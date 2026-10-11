@@ -27,7 +27,7 @@ im-admin/
 └── admin-web/       # Vue 3 + Vite + Element Plus
 ```
 
-`admin-server` 依赖 `com.caoim:im-core:1.0.0`，只用其中的实体和调用契约。管理员账号、角色、审计日志存在 `cao_im_admin`，和管理端用户 Token 分开签发。
+`admin-server` 依赖 `com.caoim:im-core:1.0.0`，只用其中的实体和调用契约。管理员账号和审计日志存在 `cao_im_admin`，Token 与 C 端用户分开签发。
 
 ## 一期
 
