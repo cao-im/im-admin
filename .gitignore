@@ -1,0 +1,41 @@
+# Maven
+target/
+*.jar
+*.war
+*.ear
+*.class
+
+# Node / Vite
+node_modules/
+dist/
+*.local
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.project
+.classpath
+.settings/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temp
+*.tmp
+*.bak
+*.swp
+*~
