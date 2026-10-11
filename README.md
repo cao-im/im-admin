@@ -75,7 +75,8 @@ im-admin/
 ## 仓库
 
 - GitHub：https://github.com/cao-im/im-admin
-- 默认分支：`dev`
+- Gitee：https://gitee.com/cao-im/im-admin
+- 默认分支：`master`
 
 ## 状态
 
