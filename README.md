@@ -80,7 +80,31 @@ im-admin/
 
 ## 状态
 
-仓库已按上述边界建立。`admin-server` 和 `admin-web` 尚未生成代码。
+一期到三期已经落地：管理员登录和权限、用户启停、群解散、消息检索、概览、敏感词、系统配置、多管理员、角色菜单、审计日志。
+
+## 启动
+
+先安装 `im-core`，并保证 MySQL 里有 `cao_im_db` 和 `cao_im_admin`。
+
+```bash
+cd im-server
+mvn clean install -DskipTests
+
+cd ../im-admin/admin-server
+mvn spring-boot:run
+```
+
+管理端 API 端口 8082。前端：
+
+```bash
+cd im-admin/admin-web
+npm install
+npm run dev
+```
+
+打开 http://localhost:5173 ，初始账号 `admin` / `admin123`。
+
+`im-server` 启动时会补上 `enabled`、敏感词表和系统配置。管理端通过 `X-Internal-Token` 调用 `http://localhost:8080/api`。
 
 ## License
 
