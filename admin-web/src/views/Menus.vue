@@ -1,14 +1,18 @@
 <template>
-  <el-card>
+  <div class="page-panel">
     <div class="toolbar">
       <el-button v-if="auth.has('system:menu:edit')" type="primary" @click="openCreate()">新增菜单</el-button>
     </div>
     <el-table :data="tree" row-key="id" default-expand-all>
-      <el-table-column prop="name" label="名称" />
-      <el-table-column prop="path" label="路径" />
-      <el-table-column prop="permission" label="权限" />
-      <el-table-column label="类型" width="90">
-        <template #default="{ row }">{{ row.menuType === 3 ? '按钮' : '菜单' }}</template>
+      <el-table-column prop="name" label="名称" min-width="160" />
+      <el-table-column prop="path" label="路径" min-width="140" />
+      <el-table-column prop="permission" label="权限" min-width="160" />
+      <el-table-column label="类型" width="100">
+        <template #default="{ row }">
+          <span class="status-pill" :class="row.menuType === 3 ? 'busy' : 'ok'">
+            {{ row.menuType === 3 ? '按钮' : '菜单' }}
+          </span>
+        </template>
       </el-table-column>
       <el-table-column prop="sortOrder" label="排序" width="80" />
       <el-table-column label="操作" width="180" v-if="auth.has('system:menu:edit')">
@@ -38,7 +42,7 @@
         <el-button type="primary" @click="save">保存</el-button>
       </template>
     </el-dialog>
-  </el-card>
+  </div>
 </template>
 
 <script setup>
@@ -77,7 +81,3 @@ async function remove(row) {
 }
 onMounted(load)
 </script>
-
-<style scoped>
-.toolbar { margin-bottom: 12px; }
-</style>

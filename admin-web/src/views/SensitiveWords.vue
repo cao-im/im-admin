@@ -1,15 +1,24 @@
 <template>
-  <el-card>
+  <div class="page-panel">
     <div class="toolbar">
       <el-input v-model="keyword" placeholder="敏感词" clearable style="width: 220px" @keyup.enter="load" />
       <el-button type="primary" @click="load">搜索</el-button>
+      <div class="spacer" />
       <el-input v-if="auth.has('im:sensitive:edit')" v-model="word" placeholder="新增敏感词" style="width: 220px" />
-      <el-button v-if="auth.has('im:sensitive:edit')" @click="create">添加</el-button>
+      <el-button v-if="auth.has('im:sensitive:edit')" type="primary" plain @click="create">添加</el-button>
     </div>
     <el-table :data="records" v-loading="loading">
-      <el-table-column prop="word" label="敏感词" />
-      <el-table-column label="状态" width="100">
-        <template #default="{ row }">{{ row.enabled === 0 ? '停用' : '启用' }}</template>
+      <el-table-column prop="word" label="敏感词" min-width="200">
+        <template #default="{ row }">
+          <span class="word-chip">{{ row.word }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" width="110">
+        <template #default="{ row }">
+          <span class="status-pill" :class="row.enabled === 0 ? 'info' : 'ok'">
+            {{ row.enabled === 0 ? '停用' : '启用' }}
+          </span>
+        </template>
       </el-table-column>
       <el-table-column prop="createTime" label="创建时间" width="180" />
       <el-table-column label="操作" width="160" v-if="auth.has('im:sensitive:edit')">
@@ -20,7 +29,7 @@
       </el-table-column>
     </el-table>
     <el-pagination class="pager" background layout="total, prev, pager, next" :total="total" :page-size="size" :current-page="page" @current-change="changePage" />
-  </el-card>
+  </div>
 </template>
 
 <script setup>
@@ -65,6 +74,14 @@ onMounted(load)
 </script>
 
 <style scoped>
-.toolbar { display: flex; gap: 8px; margin-bottom: 12px; }
-.pager { margin-top: 16px; justify-content: flex-end; }
+.spacer { flex: 1; min-width: 8px; }
+.word-chip {
+  display: inline-flex;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(244, 63, 94, 0.08);
+  color: #be123c;
+  font-weight: 600;
+  font-size: 13px;
+}
 </style>

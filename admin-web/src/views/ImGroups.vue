@@ -1,17 +1,28 @@
 <template>
-  <el-card>
+  <div class="page-panel">
     <div class="toolbar">
-      <el-input v-model="keyword" placeholder="群名称" clearable style="width: 240px" @keyup.enter="load" />
+      <el-input v-model="keyword" placeholder="群名称" clearable style="width: 260px" @keyup.enter="load" />
       <el-button type="primary" @click="load">搜索</el-button>
     </div>
     <el-table :data="records" v-loading="loading">
       <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="name" label="群名称" />
-      <el-table-column prop="ownerId" label="群主" width="100" />
-      <el-table-column prop="maxMembers" label="人数上限" width="100" />
-      <el-table-column label="状态" width="100">
+      <el-table-column label="群聊" min-width="200">
         <template #default="{ row }">
-          <el-tag :type="row.status === 0 ? 'info' : 'success'">{{ row.status === 0 ? '已解散' : '正常' }}</el-tag>
+          <div class="user-cell">
+            <div class="avatar-dot group">{{ (row.name || '群').slice(0, 1) }}</div>
+            <div class="user-meta">
+              <span class="name">{{ row.name }}</span>
+              <span class="sub">群主 ID {{ row.ownerId }}</span>
+            </div>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column prop="maxMembers" label="人数上限" width="110" />
+      <el-table-column label="状态" width="110">
+        <template #default="{ row }">
+          <span class="status-pill" :class="row.status === 0 ? 'info' : 'ok'">
+            {{ row.status === 0 ? '已解散' : '正常' }}
+          </span>
         </template>
       </el-table-column>
       <el-table-column prop="createTime" label="创建时间" width="180" />
@@ -22,7 +33,7 @@
       </el-table-column>
     </el-table>
     <el-pagination class="pager" background layout="total, prev, pager, next" :total="total" :page-size="size" :current-page="page" @current-change="changePage" />
-  </el-card>
+  </div>
 </template>
 
 <script setup>
@@ -57,8 +68,3 @@ async function dismiss(row) {
 }
 onMounted(load)
 </script>
-
-<style scoped>
-.toolbar { display: flex; gap: 8px; margin-bottom: 12px; }
-.pager { margin-top: 16px; justify-content: flex-end; }
-</style>

@@ -1,23 +1,36 @@
 <template>
-  <el-card>
+  <div class="page-panel">
     <div class="toolbar">
-      <el-input v-model="keyword" placeholder="管理员 / 动作" clearable style="width: 240px" @keyup.enter="load" />
+      <el-input v-model="keyword" placeholder="管理员 / 动作" clearable style="width: 260px" @keyup.enter="load" />
       <el-button type="primary" @click="load">搜索</el-button>
     </div>
     <el-table :data="records">
       <el-table-column prop="createTime" label="时间" width="180" />
-      <el-table-column prop="adminName" label="管理员" width="120" />
+      <el-table-column label="管理员" width="140">
+        <template #default="{ row }">
+          <div class="user-cell">
+            <div class="avatar-dot admin">{{ String(row.adminName || '?').slice(0, 1) }}</div>
+            <div class="user-meta">
+              <span class="name">{{ row.adminName }}</span>
+            </div>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column prop="action" label="动作" width="140" />
       <el-table-column prop="targetType" label="对象" width="110" />
       <el-table-column prop="targetId" label="对象 ID" width="120" />
-      <el-table-column prop="detail" label="详情" show-overflow-tooltip />
+      <el-table-column prop="detail" label="详情" show-overflow-tooltip min-width="180" />
       <el-table-column prop="ip" label="IP" width="140" />
-      <el-table-column label="结果" width="80">
-        <template #default="{ row }">{{ row.result === 0 ? '失败' : '成功' }}</template>
+      <el-table-column label="结果" width="100">
+        <template #default="{ row }">
+          <span class="status-pill" :class="row.result === 0 ? 'danger' : 'ok'">
+            {{ row.result === 0 ? '失败' : '成功' }}
+          </span>
+        </template>
       </el-table-column>
     </el-table>
     <el-pagination class="pager" background layout="total, prev, pager, next" :total="total" :page-size="size" :current-page="page" @current-change="changePage" />
-  </el-card>
+  </div>
 </template>
 
 <script setup>
@@ -38,8 +51,3 @@ async function load() {
 function changePage(value) { page.value = value; load() }
 onMounted(load)
 </script>
-
-<style scoped>
-.toolbar { display: flex; gap: 8px; margin-bottom: 12px; }
-.pager { margin-top: 16px; justify-content: flex-end; }
-</style>

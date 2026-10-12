@@ -1,15 +1,19 @@
 <template>
-  <el-card>
-    <el-form label-width="180px" style="max-width: 640px">
+  <div class="page-panel config-panel">
+    <div class="config-intro">
+      <h3>运行参数</h3>
+      <p>开关与容量配置会直接影响客户端注册、内容过滤与群聊上限。</p>
+    </div>
+    <el-form label-width="200px" class="config-form">
       <el-form-item v-for="item in configs" :key="item.configKey" :label="item.remark || item.configKey">
         <el-switch v-if="isSwitch(item.configKey)" v-model="form[item.configKey]" active-value="1" inactive-value="0" />
         <el-input-number v-else v-model="numbers[item.configKey]" :min="1" :max="10000" />
       </el-form-item>
       <el-form-item v-if="auth.has('im:config:edit')">
-        <el-button type="primary" @click="save">保存</el-button>
+        <el-button type="primary" @click="save">保存配置</el-button>
       </el-form-item>
     </el-form>
-  </el-card>
+  </div>
 </template>
 
 <script setup>
@@ -52,3 +56,27 @@ async function save() {
 
 onMounted(load)
 </script>
+
+<style scoped>
+.config-intro {
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--im-border);
+}
+
+.config-intro h3 {
+  margin: 0;
+  font-family: var(--im-display);
+  font-size: 18px;
+}
+
+.config-intro p {
+  margin: 8px 0 0;
+  color: var(--im-text-muted);
+  font-size: 13px;
+}
+
+.config-form {
+  max-width: 680px;
+}
+</style>

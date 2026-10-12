@@ -1,21 +1,38 @@
 <template>
-  <el-card>
+  <div class="page-panel">
     <div class="toolbar">
-      <el-input v-model="keyword" placeholder="账号 / 昵称" clearable style="width: 220px" @keyup.enter="load" />
+      <el-input v-model="keyword" placeholder="账号 / 昵称" clearable style="width: 240px" @keyup.enter="load" />
       <el-button type="primary" @click="load">搜索</el-button>
-      <el-button v-if="auth.has('system:admin:edit')" @click="openCreate">新增</el-button>
+      <el-button v-if="auth.has('system:admin:edit')" type="primary" plain @click="openCreate">新增</el-button>
     </div>
     <el-table :data="records">
-      <el-table-column prop="username" label="账号" />
-      <el-table-column prop="nickname" label="昵称" />
-      <el-table-column label="角色">
-        <template #default="{ row }">{{ (row.roleNames || []).join('、') }}</template>
+      <el-table-column label="账号" min-width="180">
+        <template #default="{ row }">
+          <div class="user-cell">
+            <div class="avatar-dot admin">{{ (row.nickname || row.username || '?').slice(0, 1) }}</div>
+            <div class="user-meta">
+              <span class="name">{{ row.nickname || row.username }}</span>
+              <span class="sub">{{ row.username }}</span>
+            </div>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="角色" min-width="160">
+        <template #default="{ row }">{{ (row.roleNames || []).join('、') || '—' }}</template>
       </el-table-column>
       <el-table-column label="超级管理员" width="120">
-        <template #default="{ row }">{{ row.superAdmin === 1 ? '是' : '否' }}</template>
+        <template #default="{ row }">
+          <span class="status-pill" :class="row.superAdmin === 1 ? 'ok' : 'info'">
+            {{ row.superAdmin === 1 ? '是' : '否' }}
+          </span>
+        </template>
       </el-table-column>
-      <el-table-column label="状态" width="90">
-        <template #default="{ row }">{{ row.status === 0 ? '停用' : '正常' }}</template>
+      <el-table-column label="状态" width="100">
+        <template #default="{ row }">
+          <span class="status-pill" :class="row.status === 0 ? 'danger' : 'ok'">
+            {{ row.status === 0 ? '停用' : '正常' }}
+          </span>
+        </template>
       </el-table-column>
       <el-table-column label="操作" width="260" v-if="auth.has('system:admin:edit')">
         <template #default="{ row }">
@@ -45,7 +62,7 @@
         <el-button type="primary" @click="save">保存</el-button>
       </template>
     </el-dialog>
-  </el-card>
+  </div>
 </template>
 
 <script setup>
@@ -109,8 +126,3 @@ async function remove(row) {
 }
 onMounted(async () => { await loadRoles(); await load() })
 </script>
-
-<style scoped>
-.toolbar { display: flex; gap: 8px; margin-bottom: 12px; }
-.pager { margin-top: 16px; justify-content: flex-end; }
-</style>

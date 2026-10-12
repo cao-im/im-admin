@@ -1,20 +1,33 @@
 <template>
-  <el-card>
+  <div class="page-panel">
     <div class="toolbar">
-      <el-input v-model="keyword" placeholder="用户名 / 昵称" clearable style="width: 240px" @keyup.enter="load" />
+      <el-input v-model="keyword" placeholder="用户名 / 昵称" clearable style="width: 260px" @keyup.enter="load" />
       <el-button type="primary" @click="load">搜索</el-button>
     </div>
     <el-table :data="records" v-loading="loading">
       <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="username" label="用户名" />
-      <el-table-column prop="nickname" label="昵称" />
-      <el-table-column prop="phone" label="手机" />
-      <el-table-column label="在线" width="90">
-        <template #default="{ row }">{{ onlineText(row.status) }}</template>
-      </el-table-column>
-      <el-table-column label="账号" width="90">
+      <el-table-column label="用户" min-width="200">
         <template #default="{ row }">
-          <el-tag :type="row.enabled === 0 ? 'danger' : 'success'">{{ row.enabled === 0 ? '禁用' : '启用' }}</el-tag>
+          <div class="user-cell">
+            <div class="avatar-dot">{{ (row.nickname || row.username || '?').slice(0, 1) }}</div>
+            <div class="user-meta">
+              <span class="name">{{ row.nickname || row.username }}</span>
+              <span class="sub">@{{ row.username }}</span>
+            </div>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column prop="phone" label="手机" width="140" />
+      <el-table-column label="在线" width="110">
+        <template #default="{ row }">
+          <span class="status-pill" :class="onlineClass(row.status)">{{ onlineText(row.status) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="账号" width="100">
+        <template #default="{ row }">
+          <span class="status-pill" :class="row.enabled === 0 ? 'danger' : 'ok'">
+            {{ row.enabled === 0 ? '禁用' : '启用' }}
+          </span>
         </template>
       </el-table-column>
       <el-table-column prop="createTime" label="注册时间" width="180" />
@@ -25,7 +38,7 @@
       </el-table-column>
     </el-table>
     <el-pagination class="pager" background layout="total, prev, pager, next" :total="total" :page-size="size" :current-page="page" @current-change="changePage" />
-  </el-card>
+  </div>
 </template>
 
 <script setup>
@@ -44,6 +57,10 @@ const loading = ref(false)
 
 function onlineText(status) {
   return { 0: '离线', 1: '在线', 2: '忙碌' }[status] || '离线'
+}
+
+function onlineClass(status) {
+  return { 0: 'offline', 1: 'online', 2: 'busy' }[status] || 'offline'
 }
 
 async function load() {
@@ -71,8 +88,3 @@ async function toggle(row) {
 
 onMounted(load)
 </script>
-
-<style scoped>
-.toolbar { display: flex; gap: 8px; margin-bottom: 12px; }
-.pager { margin-top: 16px; justify-content: flex-end; }
-</style>

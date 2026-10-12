@@ -1,16 +1,16 @@
 <template>
-  <el-card>
+  <div class="page-panel">
     <div class="toolbar">
       <el-button v-if="auth.has('system:role:edit')" type="primary" @click="openCreate">新增角色</el-button>
     </div>
     <el-table :data="roles">
-      <el-table-column prop="code" label="编码" />
-      <el-table-column prop="name" label="名称" />
-      <el-table-column prop="remark" label="说明" />
+      <el-table-column prop="code" label="编码" width="160" />
+      <el-table-column prop="name" label="名称" min-width="140" />
+      <el-table-column prop="remark" label="说明" min-width="200" />
       <el-table-column label="操作" width="220" v-if="auth.has('system:role:edit')">
         <template #default="{ row }">
           <el-button link @click="openEdit(row)">编辑</el-button>
-          <el-button link @click="openMenus(row)">菜单</el-button>
+          <el-button link type="primary" @click="openMenus(row)">菜单</el-button>
           <el-button link type="danger" @click="remove(row)">删除</el-button>
         </template>
       </el-table-column>
@@ -35,7 +35,7 @@
         <el-button type="primary" @click="saveMenus">保存</el-button>
       </template>
     </el-dialog>
-  </el-card>
+  </div>
 </template>
 
 <script setup>
@@ -92,7 +92,3 @@ async function remove(row) {
 }
 onMounted(load)
 </script>
-
-<style scoped>
-.toolbar { margin-bottom: 12px; }
-</style>
