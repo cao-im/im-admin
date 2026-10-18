@@ -1,92 +1,110 @@
-# IM Admin - 曹操IM后台管理
+# im-admin
 
-> 独立的运营后台。管理员登录、用户与群管理、审计日志放在这里。IM 消息和长连接仍由 im-server 负责。
-
-## 和其他模块的关系
-
-```
-flutter-demo ── im-sdk-flutter ──► im-server:8080   消息 / 群 / 好友 / WebSocket
-                                        ▲
-app-server:8081  ── Feign + X-Internal-Token ──────┘   C 端登录、注册、换 Token
-im-admin:8082    ── Feign + X-Internal-Token ──────┘   运营管理
-```
-
-| 项目 | 职责 | 端口 | 数据库 |
-|------|------|------|--------|
-| im-server | IM 核心 | 8080 | `cao_im_db` |
-| app-server | C 端认证 | 8081 | `cao_im_app_server` |
-| **im-admin** | 运营后台 | 8082 | `cao_im_admin` |
-
-im-admin 不连接 `cao_im_db`，也不把页面放进 im-boot。改用户、改群、查消息，都通过 im-server 的内部接口完成，请求头带 `X-Internal-Token`，和 app-server 调用 im-core 的方式一致。
-
-## 目录
+CaoIM 运营后台。管理员在这里查看用户和群、启停账号、解散群、检索消息、维护敏感词和系统配置，并管理后台自己的账号、角色和菜单。聊天长连接仍由 im-server 处理。
 
 ```
 im-admin/
-├── admin-server/    # Spring Boot 3.2.5 / Java 17，管理员 API
-└── admin-web/       # Vue 3 + Vite + Element Plus
+├── admin-server/    # Spring Boot API，端口 8082，库 cao_im_admin
+└── admin-web/       # Vue 3 + Vite + Element Plus，开发端口 5173
 ```
 
-`admin-server` 依赖 `com.caoim:im-core:1.0.0`，只用其中的实体和调用契约。管理员账号和审计日志存在 `cao_im_admin`，Token 与 C 端用户分开签发。
+后台不连接 `cao_im_db`。用户、群、消息、敏感词和系统配置都通过 Feign 调用 im-server 的 `/api/admin/**`，请求头带 `X-Internal-Token`。
 
-## 一期
+## 仓库一览
 
-- 管理员登录、退出（密码 BCrypt 存储，独立 JWT）
-- 用户分页、搜索
-- 禁用 / 启用账号
-- 群分页、搜索、解散
-- 操作审计（谁在什么时间做了什么）
-
-一期先做单个超级管理员，角色和菜单权限放到后面。
-
-## 二期
-
-- 概览：用户数、群数、当日消息量
-- 消息检索（按用户、群、时间，只读）
-- 敏感词
-
-## 三期
-
-- 角色、菜单、多管理员
-- 系统配置
-
-## im-server 需要补的内部接口
-
-这些接口只接受 `X-Internal-Token`，不给客户端用。实现放在 im-boot，Feign 契约放在 im-core，本仓库只调用。
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/admin/user/page` | 用户分页、按用户名/昵称搜索 |
-| PUT | `/admin/user/{id}/enabled` | 禁用或启用账号 |
-| GET | `/admin/group/page` | 群分页、搜索 |
-| PUT | `/admin/group/{id}/dismiss` | 解散群 |
-| GET | `/admin/message/page` | 消息检索（二期） |
-| GET | `/admin/stats/overview` | 概览计数（二期） |
-
-`im_user.status` 目前表示在线状态，不能拿来做封禁。账号启停要单独加字段，并在登录、建连时拒绝已禁用用户。
-
-## 技术栈
-
-| 模块 | 技术 |
+| 仓库 | 作用 |
 |------|------|
-| admin-server | Java 17、Spring Boot 3.2.5、MyBatis-Plus 3.5.6、MySQL 8、JWT 0.12.5 |
-| admin-web | Vue 3、Vite、Element Plus |
+| im-server | 消息与长连接。好友、群、历史、已读、离线同步和一对一通话信令。端口 8080，库 `cao_im_db` |
+| app-server | 客户端注册、登录、个人资料和文件上传。端口 8081，库 `cao_im_app_server` |
+| im-admin | 本仓库。运营后台：用户启停、群、消息检索、敏感词、系统配置、角色和审计。API 端口 8082，页面开发端口 5173，库 `cao_im_admin` |
+| im-sdk-flutter | Flutter SDK。负责 WebSocket、本地消息库、会话、群和通话信令，不包含界面 |
+| flutter-demo | 客户端。同一套代码运行在 Windows、macOS、Android、iOS 和 Web |
 
-## 仓库
+## 客户端界面
 
-- GitHub：https://github.com/cao-im/im-admin
-- Gitee：https://gitee.com/cao-im/im-admin
-- 默认分支：`master`
+本仓库管理的是下面这套客户端里的用户、群和消息。界面分别来自 Windows、手机和浏览器。
 
-## 状态
+### Windows
 
-一期到三期已经落地：管理员登录和权限、用户启停、群解散、消息检索、概览、敏感词、系统配置、多管理员、角色菜单、审计日志。
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/windows/01-conversation-list.png" alt="会话列表" width="420" /><br/><b>会话列表</b></td>
+    <td align="center"><img src="docs/screenshots/windows/02-private-chat.png" alt="私聊" width="420" /><br/><b>私聊</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/windows/03-group-info.png" alt="群资料" width="420" /><br/><b>群资料</b></td>
+    <td align="center"><img src="docs/screenshots/windows/04-contacts.png" alt="通讯录" width="420" /><br/><b>通讯录</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/windows/05-contact-profile.png" alt="联系人资料" width="420" /><br/><b>联系人资料</b></td>
+    <td align="center"><img src="docs/screenshots/windows/06-voice-call.png" alt="语音呼叫" width="420" /><br/><b>语音呼叫</b></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2"><img src="docs/screenshots/windows/07-video-call.jpg" alt="视频通话" width="420" /><br/><b>视频通话</b></td>
+  </tr>
+</table>
 
-## 启动
+### App
 
-先安装 `im-core`，并保证 MySQL 里有 `cao_im_db` 和 `cao_im_admin`。
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/app/01-messages.png" alt="消息" width="180" /><br/><b>消息</b></td>
+    <td align="center"><img src="docs/screenshots/app/02-chat.png" alt="私聊" width="180" /><br/><b>私聊</b></td>
+    <td align="center"><img src="docs/screenshots/app/08-contacts.png" alt="通讯录" width="180" /><br/><b>通讯录</b></td>
+    <td align="center"><img src="docs/screenshots/app/03-profile.png" alt="个人资料" width="180" /><br/><b>个人资料</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/app/06-emoji.png" alt="表情" width="180" /><br/><b>表情</b></td>
+    <td align="center"><img src="docs/screenshots/app/07-attach.png" alt="图片视频文件" width="180" /><br/><b>图片、视频、文件</b></td>
+    <td align="center"><img src="docs/screenshots/app/04-voice-call.png" alt="语音呼叫" width="180" /><br/><b>语音呼叫</b></td>
+    <td align="center"><img src="docs/screenshots/app/05-video-call.jpg" alt="视频通话" width="180" /><br/><b>视频通话</b></td>
+  </tr>
+</table>
+
+### Web
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/web/01-group-chat.png" alt="群聊" width="420" /><br/><b>群聊</b></td>
+    <td align="center"><img src="docs/screenshots/web/02-group-info.png" alt="群资料" width="420" /><br/><b>群资料</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/web/03-contacts.png" alt="通讯录" width="420" /><br/><b>通讯录</b></td>
+    <td align="center"><img src="docs/screenshots/web/04-voice-call.png" alt="语音呼叫" width="420" /><br/><b>语音呼叫</b></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2"><img src="docs/screenshots/web/05-video-incoming.png" alt="视频来电" width="420" /><br/><b>视频来电</b></td>
+  </tr>
+</table>
+
+## 功能
+
+- 管理员登录、退出、修改自己的密码。初始超级管理员 `admin` / `admin123`
+- 概览：用户数、群数、消息量
+- 用户分页搜索，禁用或启用账号。禁用后无法登录和建立长连接
+- 群分页搜索、解散群
+- 按用户、群、时间检索消息（只读）
+- 敏感词维护，系统配置读取和保存
+- 管理员、角色、菜单，以及操作审计
+
+## 环境
+
+| 环境 | 版本 |
+|------|------|
+| JDK | 17 及以上 |
+| Maven | 3.6 及以上 |
+| MySQL | 5.7 及以上 |
+| Node.js | 18 及以上，仅前端需要 |
+
+`admin-server` 依赖 `com.caoim:im-core:1.0.0`，使用其中的实体和 Feign 契约。
+
+## 本地启动
+
+im-server 先启动。三个服务的内部 Token 必须一致。
 
 ```bash
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS cao_im_admin DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
 cd im-server
 mvn clean install -DskipTests
 
@@ -94,7 +112,7 @@ cd ../im-admin/admin-server
 mvn spring-boot:run
 ```
 
-管理端 API 端口 8082。前端：
+`spring.sql.init.mode` 为 `always`，启动时执行 `admin-server/src/main/resources/schema.sql` 建表。库要事先建好，脚本只建表。没有管理员时，`DataInitializer` 会写入 `admin` / `admin123`。
 
 ```bash
 cd im-admin/admin-web
@@ -102,9 +120,73 @@ npm install
 npm run dev
 ```
 
-打开 http://localhost:5173 ，初始账号 `admin` / `admin123`。
+打开 http://localhost:5173 。Vite 把 `/api` 代理到 `http://localhost:8082`。
 
-`im-server` 启动时会补上 `enabled`、敏感词表和系统配置。管理端通过 `X-Internal-Token` 调用 `http://localhost:8080/api`。
+API 文档：http://localhost:8082/swagger-ui/index.html
+
+`admin-server/src/main/resources/application.yml` 里需要核对：
+
+| 配置 | 说明 |
+|------|------|
+| `spring.datasource` | 指向 `cao_im_admin` |
+| `im.server.url` | 默认 `http://localhost:8080/api` |
+| `im.server.internal-token` | 与 im-server 的 `im.internal-token` 相同 |
+| `jwt.secret` | 只用于后台登录 Token，与两端用户 Token 无关 |
+
+## 生产部署
+
+```bash
+cd admin-server
+mvn clean package -DskipTests
+java -jar target/admin-server-1.0.0.jar --spring.config.location=file:./config/application.yml
+
+cd ../admin-web
+npm install
+npm run build
+```
+
+`admin-web/dist` 用 Nginx 托管。把页面上的 `/api` 反代到 `127.0.0.1:8082`。上线后立刻修改初始密码，并更换 `jwt.secret` 与内部 Token。
+
+## 后台接口
+
+登录后除 `/api/auth/login` 外都要带后台 JWT。
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/auth/login` | 登录 |
+| POST | `/api/auth/logout` | 退出 |
+| GET | `/api/auth/me` | 当前管理员、角色和菜单 |
+| PUT | `/api/auth/password` | 修改自己的密码 |
+| GET | `/api/im/stats` | 概览 |
+| GET | `/api/im/users` | 用户分页 |
+| PUT | `/api/im/users/{id}/enabled` | 启停用户 |
+| GET | `/api/im/groups` | 群分页 |
+| PUT | `/api/im/groups/{id}/dismiss` | 解散群 |
+| GET | `/api/im/messages` | 消息检索 |
+| GET/POST/PUT/DELETE | `/api/im/sensitive-words` | 敏感词 |
+| GET/PUT | `/api/im/configs` | 系统配置 |
+| * | `/api/system/admins` | 管理员 |
+| * | `/api/system/roles` | 角色及菜单授权 |
+| * | `/api/system/menus` | 菜单 |
+| GET | `/api/system/audits` | 审计日志 |
+
+## 页面
+
+`admin-web/src/views`：登录、概览、用户、群、消息、敏感词、系统配置、管理员、角色、菜单、审计。
+
+## 联系与支持
+
+有新功能、定制开发或合作意向，欢迎扫码加微信私信。
+
+独立开发不易。如果这个项目对你有帮助，也可以通过微信或支付宝支持一下，你的认可是我继续更新的动力。
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/contact/wechat.jpg" alt="微信" width="220" /><br/><b>微信</b><br/>定制与合作</td>
+    <td align="center"><img src="docs/contact/wechat-pay.jpg" alt="微信支付" width="220" /><br/><b>微信支付</b></td>
+    <td align="center"><img src="docs/contact/alipay.jpg" alt="支付宝" width="220" /><br/><b>支付宝</b></td>
+  </tr>
+</table>
 
 ## License
 
