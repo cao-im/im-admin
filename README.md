@@ -4,11 +4,11 @@ CaoIM 运营后台。管理员在这里查看用户和群、启停账号、解�
 
 ```
 im-admin/
-├── admin-server/    # Spring Boot API，端口 8082，库 cao_im_admin
+├── admin-server/    # Spring Boot API，端口 8082，管理员表在 cao_im_db
 └── admin-web/       # Vue 3 + Vite + Element Plus，开发端口 5173
 ```
 
-后台不连接 `cao_im_db`。用户、群、消息、敏感词和系统配置都通过 Feign 调用 im-server 的 `/api/admin/**`，请求头带 `X-Internal-Token`。
+管理员、角色、菜单和审计存在 `cao_im_db` 的 `admin_*` 表。用户、群、消息、敏感词和系统配置通过 Feign 调用 im-server 的 `/api/admin/**`，请求头带 `X-Internal-Token`。
 
 ## 仓库一览
 
@@ -16,7 +16,7 @@ im-admin/
 |------|------|--------|-------|
 | im-server | 消息与长连接。好友、群、历史、已读、离线同步和一对一通话信令。端口 8080，库 `cao_im_db` | [im-server](https://github.com/cao-im/im-server) | [im-server](https://gitee.com/cao-im/im-server) |
 | app-server | 客户端注册、登录、个人资料和文件上传。端口 8081，库 `cao_im_app_server` | [app-server](https://github.com/cao-im/app-server) | [app-server](https://gitee.com/cao-im/app-server) |
-| im-admin | 本仓库。运营后台：用户启停、群、消息检索、敏感词、系统配置、角色和审计。API 端口 8082，页面开发端口 5173，库 `cao_im_admin` | [im-admin](https://github.com/cao-im/im-admin) | [im-admin](https://gitee.com/cao-im/im-admin) |
+| im-admin | 本仓库。运营后台：用户启停、群、消息检索、敏感词、系统配置、角色和审计。API 端口 8082，页面开发端口 5173，管理员表在 `cao_im_db` | [im-admin](https://github.com/cao-im/im-admin) | [im-admin](https://gitee.com/cao-im/im-admin) |
 | im-sdk-flutter | Flutter SDK。负责 WebSocket、本地消息库、会话、群和通话信令，不包含界面 | [im-sdk-flutter](https://github.com/cao-im/im-sdk-flutter) | [im-sdk-flutter](https://gitee.com/cao-im/im-sdk-flutter) |
 | flutter-demo | 客户端。同一套代码运行在 Windows、macOS、Android、iOS 和 Web | [flutter-demo](https://github.com/cao-im/flutter-demo) | [flutter-demo](https://gitee.com/cao-im/flutter-demo) |
 
@@ -150,8 +150,6 @@ flowchart LR
 im-server 先启动。三个服务的内部 Token 必须一致。
 
 ```bash
-mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS cao_im_admin DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-
 cd im-server
 mvn clean install -DskipTests
 
@@ -159,7 +157,7 @@ cd ../im-admin/admin-server
 mvn spring-boot:run
 ```
 
-`spring.sql.init.mode` 为 `always`，启动时执行 `admin-server/src/main/resources/schema.sql` 建表。库要事先建好，脚本只建表。没有管理员时，`DataInitializer` 会写入 `admin` / `admin123`。
+`spring.sql.init.mode` 为 `always`，启动时在 `cao_im_db` 执行 `admin-server/src/main/resources/schema.sql` 建 `admin_*` 表。请先准备好 `cao_im_db`。没有管理员时，`DataInitializer` 会写入 `admin` / `admin123`。
 
 ```bash
 cd im-admin/admin-web
@@ -175,7 +173,7 @@ API 文档：http://localhost:8082/swagger-ui/index.html
 
 | 配置 | 说明 |
 |------|------|
-| `spring.datasource` | 指向 `cao_im_admin` |
+| `spring.datasource` | 指向 `cao_im_db`，与 im-server 同一个库 |
 | `im.server.url` | 默认 `http://localhost:8080/api` |
 | `im.server.internal-token` | 与 im-server 的 `im.internal-token` 相同 |
 | `jwt.secret` | 只用于后台登录 Token，与两端用户 Token 无关 |

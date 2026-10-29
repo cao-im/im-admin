@@ -1,3 +1,4 @@
+-- 管理员、角色、菜单和审计表，建在 cao_im_db，与 im-server 共用。
 CREATE TABLE IF NOT EXISTS admin_user (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) NOT NULL,
