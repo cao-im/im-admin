@@ -21,7 +21,7 @@ spring:
 im:
   server:
     url: http://localhost:8080/api
-    internal-token: caoim-dev-internal-token
+    internal-token: ${IM_INTERNAL_TOKEN:caoim-dev-internal-token}
 
 mybatis-plus:
   configuration:
@@ -34,7 +34,7 @@ mybatis-plus:
       logic-not-delete-value: 0
 
 jwt:
-  secret: cao-im-admin-jwt-secret-key-2026-must-be-long-enough-for-hs256
+  secret: ${ADMIN_JWT_SECRET:cao-im-admin-jwt-secret-key-2026-must-be-long-enough-for-hs256}
   expiration: 86400000
   header: Authorization
   prefix: Bearer
